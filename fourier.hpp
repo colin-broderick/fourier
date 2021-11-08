@@ -9,8 +9,10 @@
 
 namespace Fourier
 {
-    using Points = std::vector<std::array<double, 2>>;
-    using Lines = std::vector<std::array<std::array<double, 2>, 2>>;
+    using Point = std::array<double, 2>;
+    using Points = std::vector<Point>;
+    using Line = std::array<Point, 2>;
+    using Lines = std::vector<Line>;
 
     class FourierFit
     {

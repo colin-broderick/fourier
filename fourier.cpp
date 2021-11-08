@@ -6,11 +6,12 @@
 
 #include "fourier.hpp"
 
-Fourier::FourierFit::FourierFit(const Points &points_, const int order_) : points(points_), order(order_)
+Fourier::FourierFit::FourierFit(const Points &points_, const int order_)
+: points(points_), order(order_)
 {
 }
 
-// Gets the needed mathematical data for the lines that make the shape
+/** \brief Gets the needed mathematical data for the lines that make the shape. */
 void Fourier::FourierFit::create_line_segments()
 {
     for (unsigned int i = 0; i < points.size() - 1; i++)
@@ -27,61 +28,60 @@ void Fourier::FourierFit::process()
     p = lines.size();
 
     // Finds the coefficients for both coordinates
-    double ax0 = get_a0(0);
-    double ay0 = get_a0(1);
-    std::vector<double> ax;
-    std::vector<double> bx;
-    std::vector<double> ay;
-    std::vector<double> by;
+    double ax_0 = get_a0(0);
+    double ay_0 = get_a0(1);
+    std::vector<double> ax_coefficients;
+    std::vector<double> bx_coefficients;
+    std::vector<double> ay_coefficients;
+    std::vector<double> by_coefficients;
 
     for (int i = 0; i < order; i++)
     {
         int n = i + 1;
-        ax.push_back(get_an(0, n));
-        bx.push_back(get_bn(0, n));
-        ay.push_back(get_an(1, n));
-        by.push_back(get_bn(1, n));
+        ax_coefficients.push_back(get_an(0, n));
+        bx_coefficients.push_back(get_bn(0, n));
+        ay_coefficients.push_back(get_an(1, n));
+        by_coefficients.push_back(get_bn(1, n));
     }
 
     std::vector<double> timestamps = arange(0, p, p / 1000.0);
 
     // Get plot data
-    for (auto &timestamp : timestamps)
+    for (double &timestamp : timestamps)
     {
-        fx.push_back(end_fun(ax0, ax, bx, p, timestamp));
-        fy.push_back(end_fun(ay0, ay, by, p, timestamp));
+        fx.push_back(end_fun(ax_0, ax_coefficients, bx_coefficients, p, timestamp));
+        fy.push_back(end_fun(ay_0, ay_coefficients, by_coefficients, p, timestamp));
     }
 
     processed = true;
 }
 
-// Given initial coordinate I, final coordinate F, returns contribution to a0 coefficient
-double Fourier::FourierFit::a0_segment(const double initial_coordinate, const double final_coordinate)
+/** \brief Given initial coordinate I, final coordinate F, returns contribution to a0 coefficient. */
+double Fourier::FourierFit::a0_segment(const double I, const double F)
 {
-    return (initial_coordinate + final_coordinate) / 2.0;
+    return (I + F) / 2.0;
 }
 
-// Given initial coordinate I, final coordinate F,line number L,and n, returns contribution to an coefficient
-double Fourier::FourierFit::an_segment(const double initial_coordinate, const double final_coordinate, const double L, const double n)
+/** \brief Given initial coordinate I, final coordinate F, line number L,and n, returns contribution to an coefficient. */
+double Fourier::FourierFit::an_segment(const double I, const double F, const double L, const double n)
 {
     double N = 2 * pi * n / p;
-    double D = final_coordinate - initial_coordinate;
-    double term1 = ((initial_coordinate - L * D) / N) * (std::sin(N * (L + 1)) - std::sin(N * L));
+    double D = F - I;
+    double term1 = ((I - L * D) / N) * (std::sin(N * (L + 1)) - std::sin(N * L));
     double term2 = (D / N / N) * (N * (L + 1) * std::sin(N * (L + 1)) - N * L * std::sin(N * L) + std::cos(N * (L + 1)) - std::cos(N * L));
     return term1 + term2;
 }
 
-// Given initial coordinate I, final coordinate F,line number L,and n, returns contribution to bn coefficient
-double Fourier::FourierFit::bn_segment(const double initial_coordinate, const double final_coordinate, const double L, const double n)
+/** \brief Given initial coordinate I, final coordinate F,line number L,and n, returns contribution to bn coefficient. */
+double Fourier::FourierFit::bn_segment(const double I, const double F, const double L, const double n)
 {
     double N = 2 * pi * n / p;
-    double D = final_coordinate - initial_coordinate;
-    double term1 = (-(initial_coordinate - L * D) / N) * (std::cos(N * (L + 1)) - std::cos(N * L));
+    double D = F - I;
+    double term1 = (-(I - L * D) / N) * (std::cos(N * (L + 1)) - std::cos(N * L));
     double term2 = (D / N / N) * (-N * (L + 1) * std::cos(N * (L + 1)) + N * L * std::cos(N * L) + std::sin(N * (L + 1)) - std::sin(N * L));
     return term1 + term2;
 }
 
-// c defines which coordinate to get coefficient for: 0=x, 1=y
 double Fourier::FourierFit::get_a0(const double c)
 {
     double a = 0;
@@ -126,7 +126,7 @@ double Fourier::FourierFit::cosine_part(const double n, const double T, const do
     return std::cos(2 * pi * n * x / T);
 }
 
-// Puts together the final Fourier series and returns y for given x
+/** \brief Puts together the final Fourier series and returns y for given x. */
 double Fourier::FourierFit::end_fun(const double a0, const std::vector<double> &a, const std::vector<double> &b, const double T, const double x)
 {
     double y = a0;
