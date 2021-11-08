@@ -10,15 +10,20 @@ Fourier::FourierFit::FourierFit(const Points &points_, const int order_) : point
 {
 }
 
-void Fourier::FourierFit::process()
+// Gets the needed mathematical data for the lines that make the shape
+void Fourier::FourierFit::create_line_segments()
 {
-    // Gets the needed mathematical data for the lines that make the shape
     for (unsigned int i = 0; i < points.size() - 1; i++)
     {
         lines.push_back({points[i], points[i + 1]});
     }
     lines.push_back({points.back(), points.front()});
+}
 
+void Fourier::FourierFit::process()
+{
+    create_line_segments();
+    
     p = lines.size();
 
     // Finds the coefficients for both coordinates

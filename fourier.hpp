@@ -42,6 +42,8 @@ namespace Fourier
 
             double cosine_part(const double n, const double T, const double x);
 
+            void create_line_segments();
+
             /** \brief Puts together the final Fourier series and returns y for given x. */
             double end_fun(const double a0, const std::vector<double> &a, const std::vector<double> &b, const double T, const double x);
 
